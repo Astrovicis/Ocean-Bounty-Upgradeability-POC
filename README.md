@@ -1,5 +1,3 @@
-> [matryx.ai](https://www.matryx.ai): A Collaborative Research and Development Platform
-
 ## Performing An Upgrade
 
 1. Install dependencies, remove the build folder, and start ganache
@@ -21,6 +19,3 @@
     ```
     
  4. TBC
-
----
--The Matryx Team
