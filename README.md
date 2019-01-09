@@ -23,3 +23,5 @@
      registry = contract(DIDRegistry.address, IDIDRegistry)
      registry...(TBC)
      ```
+     
+  5. 
