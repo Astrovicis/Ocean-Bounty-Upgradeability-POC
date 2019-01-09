@@ -14,12 +14,13 @@
     truffle console
     ```
 
-3. The following commands are all executing inside truffle console
+3. The following commands are executed inside of truffle console
     ```
     migrate --reset
     .load setup
     ```
-
+    
+ 4. TBC
 
 ---
 -The Matryx Team
