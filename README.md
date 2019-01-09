@@ -18,4 +18,8 @@
     .load setup
     ```
     
- 4. TBC
+ 4. You may now perform DIDRegistry functions as you would on a normal smart contract.
+     ```
+     registry = contract(DIDRegistry.address, IDIDRegistry)
+     registry...(TBC)
+     ```
