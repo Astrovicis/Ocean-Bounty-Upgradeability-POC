@@ -1,0 +1,20 @@
+q = []
+
+q.push("system = contract(ContractSystem.address, ContractSystem)")
+q.push("system.createCollection($COLLECTION)")
+q.push("system.setCollection($COLLECTION)")
+
+q.push("system.setContract($COLLECTION, $VERSION, stb('DIDRegistry'), DIDRegistry.address)")
+q.push("system.setContractType(DIDRegistry.address, 2)")
+
+q.push("system.setContract($COLLECTION, $VERSION, stb('LibDIDRegistry'), LibDIDRegistry.address)")
+q.push("system.setContractType(LibDIDRegistry.address, 2)")
+
+q.push("system.setContract($COLLECTION, $VERSION, stb('MatryxPlatform'), MatryxPlatform.address)")
+q.push("system.setContractType(MatryxPlatform.address, 2)")
+
+q.push("system.setLibraryName(2, stb('LibDIDRegistry'))")
+
+$COMMANDS
+
+;(async () => { for (let cmd of q) try { await eval(cmd) } catch (err) {} })()
