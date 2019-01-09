@@ -1,5 +1,5 @@
-var MatryxSystem = artifacts.require('MatryxSystem')
+var ContractSystem = artifacts.require('ContractSystem')
 
 module.exports = function(deployer) {
-  deployer.deploy(MatryxSystem, { overwrite: false })
+  deployer.deploy(ContractSystem)
 }

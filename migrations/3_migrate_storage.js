@@ -3,5 +3,5 @@ var ContractStorage = artifacts.require('ContractStorage')
 var network = require('../truffle/network')
 
 module.exports = function (deployer) {
-  deployer.deploy(ContractStorage, ContractSystem.address, { overwrite: false })
+  deployer.deploy(ContractStorage, ContractSystem.address)
 }

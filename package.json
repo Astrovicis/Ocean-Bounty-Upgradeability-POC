@@ -28,7 +28,9 @@
     "type": "git",
     "url": "https://github.com/matryx/matryx-alpha-source.git"
   },
-  "dependencies": {},
+  "dependencies": {
+    "truffle-hdwallet-provider": "^1.0.2"
+  },
   "licenses": [
     {
       "type": "MIT",
@@ -42,7 +44,6 @@
     "solc": "^0.4.24",
     "solidity-coverage": "^0.5.5",
     "solidity-sha3": "^0.4.1",
-    "truffle-hdwallet-provider": "0.0.5",
     "web3": "^0.19.1"
   }
 }
