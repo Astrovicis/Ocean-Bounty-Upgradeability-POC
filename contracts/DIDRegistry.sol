@@ -16,6 +16,8 @@ interface IDIDRegistry {
     function registerAttribute(bytes32 _did, LibDIDRegistry.ValueType _type, bytes32 _key, string calldata _value) external;
     function getUpdateAt(bytes32 _did) external view returns(uint);
     function getOwner(bytes32 _did) external view returns(address);
+
+    function upgrade() external;
 }
 
 library LibDIDRegistry {

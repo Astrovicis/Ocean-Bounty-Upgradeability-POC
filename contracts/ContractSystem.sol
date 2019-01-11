@@ -41,10 +41,9 @@ contract ContractSystem is Ownable() {
     }
 
     /// @dev Set a contract address for a contract by a given name
-    /// @param version    Version of the contract
     /// @param name       Name of the contract we want to set an address for
     /// @param cAddress   Address of the contract
-    function setContract(uint256 version, bytes32 name, address cAddress) public onlyOwner {
+    function setContract(bytes32 name, address cAddress) public onlyOwner {
         require(hasCode(cAddress), "Invalid contract address");
 
         if (contracts[name].location == address(0)) {
@@ -52,28 +51,39 @@ contract ContractSystem is Ownable() {
         }
 
         contracts[name].location = cAddress;
+    }
+
+    /// @dev Set a contract address for a contract by a given name
+    /// @param version    Version to set the contract to
+    /// @param name       Name of the contract whose version we want to change
+    function setContractVersion(uint256 version, bytes32 name) public onlyOwner {
         contracts[name].currentVersion = version;
     }
     
     /// @dev Sets the address of the upgrade agent of a library's storage contract for a given version
     /// @param version    Version of the library to set the upgrade library for
-    /// @param name       Name of the library to set the upgrade library for
+    /// @param name       Name of the main contract library to set the upgrade library for
     /// @param libAddress Upgrade agent library address
     function setUpgradeAgent(uint256 version, bytes32 name, address libAddress) public onlyOwner {
         require(contracts[name].location != address(0), "Invalid contract");
         require(hasCode(libAddress), "Invalid library address");
-        contracts[name].upgradeAgents[version] = libAddress;    
+        contracts[name].upgradeAgents[version] = libAddress;
+    }
+
+    function getUpgradeAgent(uint256 version, bytes32 name) public view returns (address)
+    {
+        require(contracts[name].location != address(0), "Invalid contract");
+        return contracts[name].upgradeAgents[version];
     }
 
     /// @dev Returns the address of a contract given its name
     /// @param name       Name of the contract we want an address for
-    /// @param version    Version of Platform to lookup the address on
     /// @return           Address of the contract
-    function getContract(uint256 version, bytes32 name) public view returns (address) {
+    function getContract(bytes32 name) public view returns (address, uint256) {
         address cAddress = contracts[name].location;
         require(hasCode(cAddress), "Invalid contract address");
 
-        return cAddress;
+        return (cAddress, contracts[name].currentVersion);
     }
 
     /// @dev Register a library method for a library by its name
@@ -101,11 +111,11 @@ contract ContractSystem is Ownable() {
     }
 
     /// @dev Gets calldata translation data given a library (name or type) and function selector
-    /// @param version     Version of Platform for the method request
+    /// @param version     Version of ContractStorage for the method request
     /// @param libAddress  Address of the library to get the translation data for
     /// @param selector    Hash of the method signature to register to the contract (keccak256)
     /// @return            Calldata transformation information for library delegatecall
-    function getCallTranslation(uint256 version, address libAddress, bytes32 selector) public view returns (CallTranslationData memory) {
+    function getCallTranslation(uint256 version, address libAddress, bytes32 selector) public returns (CallTranslationData memory) {
         /* contract address identifier */
         bytes32 libraryName = contractTypeToLibraryName[contractToType[libAddress]];
         ContractData storage contractData = contracts[libraryName];
@@ -113,7 +123,7 @@ contract ContractSystem is Ownable() {
         // create the callTranslationData with the correct library address
         CallTranslationData memory translationData;
         bytes32 sel;
-        assembly { sel := 0xd55ec697 }
+        assembly { sel := shl(224, 0xd55ec697) }
         if(selector == sel) // 'upgrade()'
         {
             require(version != contractData.currentVersion);
@@ -123,7 +133,13 @@ contract ContractSystem is Ownable() {
         }
         else
         {
-            require(version == contractData.currentVersion);
+            assembly
+            {
+                mstore(0, version)
+                mstore(0x20, sload(add(contractData_slot, 1)))
+                log0(0, 0x40)
+            }
+            // require(version == contractData.currentVersion);
         }
 
         translationData = contractData.callTranslationData[version][selector];
