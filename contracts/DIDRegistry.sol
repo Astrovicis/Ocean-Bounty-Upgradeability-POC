@@ -42,7 +42,7 @@ library LibDIDRegistry {
         uint updatedAt
     );
 
-    function registerAttribute(address self, address sender, uint256 didRegisterSlot, bytes32 _did, LibDIDRegistry.ValueType _type, bytes32 _key, string calldata _value) external {
+    function registerAttribute(address self, address sender, uint256 didRegisterSlot, bytes32 _did, LibDIDRegistry.ValueType _type, bytes32 _key, string memory _value) public {
         address currentOwner;
         bytes32 s_location;
         assembly
@@ -62,7 +62,7 @@ library LibDIDRegistry {
         emit DIDAttributeRegistered(_did, msg.sender, _key, _value, _type, block.number);
     }
 
-    function getUpdateAt(address self, address sender, uint256 didRegisterSlot, bytes32 _did) external view returns(uint blockUpdated) {
+    function getUpdateAt(address self, address sender, uint256 didRegisterSlot, bytes32 _did) public view returns(uint blockUpdated) {
         assembly
         {
             mstore(0x00, _did)
@@ -73,7 +73,7 @@ library LibDIDRegistry {
         }
     }
 
-    function getOwner(address self, address sender, uint256 didRegisterSlot, bytes32 _did) external view returns(address owner) {
+    function getOwner(address self, address sender, uint256 didRegisterSlot, bytes32 _did) public view returns(address owner) {
         assembly
         {
             mstore(0x00, _did)

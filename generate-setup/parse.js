@@ -2,7 +2,6 @@ const fs = require('fs')
 const sha3 = require('solidity-sha3').default
 const generate = require('./generate')
 
-const collection = 1
 const version = process.argv[3] || 1
 const batch = process.argv[2] === 'true'
 

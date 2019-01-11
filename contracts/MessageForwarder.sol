@@ -3,17 +3,15 @@ pragma experimental ABIEncoderV2;
 
 contract MessageForwarder {
     struct Info {
-        uint256 collection;
-        uint256 version;
         address system;
+        address storageAddress;
     }
 
     Info info;
 
-    constructor(uint256 _collection, uint256 _version, address _system) public {
-        info.collection = _collection;
-        info.version = _version;
+    constructor(address _system, address _storageAddress) public {
         info.system = _system;
+        info.storageAddress = _storageAddress;
     }
 
     /// @dev
@@ -24,27 +22,24 @@ contract MessageForwarder {
         assembly {
             let ptr := mload(0x40)
             let offset := 0x100000000000000000000000000000000000000000000000000000000
-            let cStorage := 0x43656e7472616c53746f72616765000000000000000000000000000000000000
-            let collection := sload(info_slot)
-            let version := sload(add(info_slot,1))
-            let system := sload(add(info_slot, 2))
+            // needs to be specific to contract name (stored in info)
+            let system := sload(info_slot)
+            let cStorage := sload(add(info_slot, 1))
 
-            // get CentralStorage address from ContractSystem
-            mstore(ptr, mul(0x509f1089, offset))                                // getContract(uint256,uint256,bytes32)
-            mstore(add(ptr, 0x04), collection)                            // arg 0 - collection this forwarder belongs to
-            mstore(add(ptr, 0x24), version)                                     // arg 1 - version of this forwarder
-            mstore(add(ptr, 0x44), cStorage)                                    // arg 2 - 'CentralStorage'
-            let res := call(gas, system, 0, ptr, 0x64, 0, 0x20)                 // call ContractSystem.getContract
-            if iszero(res) { revert(0, 0) }                                     // safety check
-            cStorage := mload(0)                                                // load centralStorage address
+            // log0(ptr, 0x20)
+            // return(0,0)
 
-            // forward call to CentralStorage, injecting sender, collection and version
-            calldatacopy(ptr, 0, 0x04)                                          // copy signature
+            mstore(ptr, mul(0x5a9b0b89, offset))                                // getInfo()        
+            let res := call(gas, cStorage, 0, ptr, 0, ptr, 0x60)                // call contractStorage.getInfo
+            if iszero(res) { revert(0,0) }                                      // safety check
+            let version := mload(add(ptr, 0x20))                                // storage version
+
+            // forward call to ContractStorage, injecting sender and version
+            calldatacopy(ptr, 0, 0x04)                                          // copy selector
             mstore(add(ptr, 0x04), caller)                                      // inject msg.sender
-            mstore(add(ptr, 0x24), collection)                                  // inject collection
-            mstore(add(ptr, 0x44), version)                                     // inject version
-            calldatacopy(add(ptr, 0x64), 0x04, sub(calldatasize, 0x04))         // copy calldata for forwarding
-            res := call(gas, cStorage, 0, ptr, add(calldatasize, 0x60), 0, 0)   // forward method to CentralStorage
+            mstore(add(ptr, 0x24), version)                                     // inject version
+            calldatacopy(add(ptr, 0x44), 0x04, sub(calldatasize, 0x04))         // copy calldata for forwarding
+            res := call(gas, cStorage, 0, ptr, add(calldatasize, 0x40), 0, 0)   // forward method to ContractStorage
             if iszero(res) { revert(0, 0) }                                     // safety check
 
             // forward returndata to caller

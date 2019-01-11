@@ -1,19 +1,19 @@
 q = []
 
 q.push("system = contract(ContractSystem.address, ContractSystem)")
-q.push("system.createCollection($COLLECTION)")
-q.push("system.setCollection($COLLECTION)")
 
-q.push("system.setContract($COLLECTION, $VERSION, stb('DIDRegistry'), DIDRegistry.address)")
+q.push("system.setContract(1, stb('DIDRegistry'), DIDRegistry.address)")
 q.push("system.setContractType(DIDRegistry.address, 2)")
 
-q.push("system.setContract($COLLECTION, $VERSION, stb('LibDIDRegistry'), LibDIDRegistry.address)")
+q.push("system.setContract(1, stb('LibDIDRegistry'), LibDIDRegistry.address)")
 q.push("system.setContractType(LibDIDRegistry.address, 2)")
 
-q.push("system.setContract($COLLECTION, $VERSION, stb('MatryxPlatform'), MatryxPlatform.address)")
-q.push("system.setContractType(MatryxPlatform.address, 2)")
+q.push("system.setLibraryNameForType(2, stb('LibDIDRegistry'))")
 
-q.push("system.setLibraryName(2, stb('LibDIDRegistry'))")
+q.push("system.addCallTranslation(1, stb('LibDIDRegistry'), '0x724ebe75', [LibDIDRegistry.address, '0x0c637e5e', [3],[3]])")
+q.push("system.addCallTranslation(1, stb('LibDIDRegistry'), '0xdeb931a2', [LibDIDRegistry.address, '0x4685910d', [3], []])")
+
+q.push("registry = contract(DIDRegistry.address, IDIDRegistry);0")
 
 $COMMANDS
 
