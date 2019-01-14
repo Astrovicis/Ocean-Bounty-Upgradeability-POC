@@ -1,0 +1,11 @@
+r = []
+
+r.push("system.setUpgradeAgent(1, stb('LibDIDRegistry'), LibDIDRegistry_UpgradeV1.address)")
+r.push("system.setContractVersion(2, stb('LibDIDRegistry'))")
+
+r.push("registry.upgrade()")
+
+r.push("system.addCallTranslation(2, stb('LibDIDRegistry'), '0x724ebe75', [LibDIDRegistry.address, '0x0c637e5e', [3],[3]])")
+r.push("system.addCallTranslation(2, stb('LibDIDRegistry'), '0xdeb931a2', [LibDIDRegistry.address, '0x4685910d', [3], []])")
+
+;(async () => { for (let cmd of r) try { await eval(cmd) } catch (err) {} })()

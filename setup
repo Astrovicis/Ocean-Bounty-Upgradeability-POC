@@ -1,6 +1,7 @@
 q = []
 
 q.push("system = contract(ContractSystem.address, ContractSystem)")
+q.push("storage = contract(ContractStorage.address, ContractStorage)")
 
 q.push("system.setContract(stb('DIDRegistry'), DIDRegistry.address)")
 q.push("system.setContractVersion(1, stb('DIDRegistry'))")
@@ -19,11 +20,5 @@ q.push("system.addCallTranslation(1, stb('LibDIDRegistry'), '0xdeb931a2', [LibDI
 q.push("registry = contract(DIDRegistry.address, IDIDRegistry);0")
 // q.push("registry.registerAttribute(stb('did'), 2, stb('key'), 'value')")
 // q.push("registry.getOwner(stb('did'))")
-
-q.push("system.setUpgradeAgent(1, stb('LibDIDRegistry'), LibDIDRegistry_UpgradeV1.address)")
-q.push("system.setContractVersion(2, stb('LibDIDRegistry'))")
-
-q.push("system.addCallTranslation(2, stb('LibDIDRegistry'), '0x724ebe75', [LibDIDRegistry.address, '0x0c637e5e', [3],[3]])")
-q.push("system.addCallTranslation(2, stb('LibDIDRegistry'), '0xdeb931a2', [LibDIDRegistry.address, '0x4685910d', [3], []])")
 
 ;(async () => { for (let cmd of q) try { await eval(cmd) } catch (err) {} })()
