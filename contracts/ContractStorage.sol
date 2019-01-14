@@ -127,16 +127,6 @@ contract ContractStorage {
         return info;
     }
 
-    function getSlotFromKey(bytes32 key, uint256 slotNumber) public view returns (bytes32 returnData)
-    {
-        assembly
-        {
-            mstore(0, key)
-            mstore(0x20, slotNumber)
-            returnData := sload(keccak256(0, 0x40))
-        }
-    }
-
     /// @dev Sets the owner of the platform
     /// @param newOwner  New owner address
     function setOwner(address newOwner) external {
