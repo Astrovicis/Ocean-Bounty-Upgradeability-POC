@@ -26,11 +26,9 @@ contract MessageForwarder {
             let system := sload(info_slot)
             let cStorage := sload(add(info_slot, 1))
 
-            // log0(ptr, 0x20)
-            // return(0,0)
 
             mstore(ptr, mul(0x5a9b0b89, offset))                                // getInfo()        
-            let res := call(gas, cStorage, 0, ptr, 0, ptr, 0x60)                // call contractStorage.getInfo
+            let res := call(gas, cStorage, 0, ptr, 0x04, ptr, 0x60)             // call contractStorage.getInfo
             if iszero(res) { revert(0,0) }                                      // safety check
             let version := mload(add(ptr, 0x20))                                // storage version
 
@@ -39,6 +37,7 @@ contract MessageForwarder {
             mstore(add(ptr, 0x04), caller)                                      // inject msg.sender
             mstore(add(ptr, 0x24), version)                                     // inject version
             calldatacopy(add(ptr, 0x44), 0x04, sub(calldatasize, 0x04))         // copy calldata for forwarding
+
             res := call(gas, cStorage, 0, ptr, add(calldatasize, 0x40), 0, 0)   // forward method to ContractStorage
             if iszero(res) { revert(0, 0) }                                     // safety check
 

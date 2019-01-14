@@ -18,6 +18,7 @@ contract LibDIDRegistry_UpgradeV1 {
     
     function upgrade() public
     {
+        // didRegister['did'].owner = info.system
         didRegister[0x6469640000000000000000000000000000000000000000000000000000000000].owner = info.system;
     }
 }

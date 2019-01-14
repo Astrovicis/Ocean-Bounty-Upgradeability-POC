@@ -7,9 +7,9 @@ import "./ContractSystem.sol";
 import "./ContractStorage.sol";
 import "./MessageForwarder.sol";
 
-contract DIDRegistry is ContractStorage {
-    mapping(bytes32 => LibDIDRegistry.DIDRegister) private didRegister;
-    constructor (address _system) ContractStorage(_system) public {}
+contract DIDRegistry is MessageForwarder {
+    // mapping(bytes32 => LibDIDRegistry.DIDRegister) private didRegister;
+    constructor (address _system, address storageAddress) MessageForwarder(_system, storageAddress) public {}
 }
 
 interface IDIDRegistry {
@@ -54,14 +54,14 @@ library LibDIDRegistry {
             s_location := keccak256(0, 0x40)
             currentOwner := sload(s_location)
         }
-        require(currentOwner == address(0x0) || currentOwner == msg.sender, 'Attributes must be registered by the DID owners.');
+        require(currentOwner == address(0x0) || currentOwner == sender, 'Attributes must be registered by the DID owners.');
 
         assembly
         {
-            sstore(s_location, caller)
+            sstore(s_location, sender)
             sstore(add(s_location, 1), number)
         }
-        emit DIDAttributeRegistered(_did, msg.sender, _key, _value, _type, block.number);
+        emit DIDAttributeRegistered(_did, sender, _key, _value, _type, block.number);
     }
 
     function getUpdateAt(address self, address sender, uint256 didRegisterSlot, bytes32 _did) public view returns(uint blockUpdated) {

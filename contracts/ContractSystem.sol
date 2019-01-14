@@ -28,7 +28,7 @@ contract ContractSystem is Ownable() {
 
     modifier onlyOwnerOrStorage {
         bool isOwner = msg.sender == owner;
-        bool isStorage = contractToType[msg.sender] == uint256(LibSystem.ContractType.Storage);
+        bool isStorage = contractToType[msg.sender] == uint256(LibContractSystem.ContractType.Storage);
         require(isOwner || isStorage, "Must be owner or Platform");
         _;
     }
@@ -111,13 +111,13 @@ contract ContractSystem is Ownable() {
     }
 
     /// @dev Gets calldata translation data given a library (name or type) and function selector
-    /// @param version     Version of ContractStorage for the method request
-    /// @param libAddress  Address of the library to get the translation data for
-    /// @param selector    Hash of the method signature to register to the contract (keccak256)
-    /// @return            Calldata transformation information for library delegatecall
-    function getCallTranslation(uint256 version, address libAddress, bytes32 selector) public returns (CallTranslationData memory) {
+    /// @param version          Version of ContractStorage for the method request
+    /// @param contractAddress  Address of the library to get the translation data for
+    /// @param selector         Hash of the method signature to register to the contract (keccak256)
+    /// @return                 Calldata transformation information for library delegatecall
+    function getCallTranslation(uint256 version, address contractAddress, bytes32 selector) public returns (CallTranslationData memory) {
         /* contract address identifier */
-        bytes32 libraryName = contractTypeToLibraryName[contractToType[libAddress]];
+        bytes32 libraryName = contractTypeToLibraryName[contractToType[contractAddress]];
         ContractData storage contractData = contracts[libraryName];
 
         // create the callTranslationData with the correct library address
@@ -180,7 +180,7 @@ contract ContractSystem is Ownable() {
 
 }
 
-interface IMatryxSystem {
+interface IContractSystem {
     function addContract(uint256 version, bytes32 name, address cAddress) external;
     function getContract(uint256 version, bytes32 name) external view returns (address);
     function addCallTranslation(uint256 version, bytes32 libName, bytes32 selector, ContractSystem.CallTranslationData calldata callTranslationData) external;
@@ -192,6 +192,6 @@ interface IMatryxSystem {
     function getLibraryNameForType(uint256 contractType) external view returns (bytes32);
 }
 
-library LibSystem {
+library LibContractSystem {
     enum ContractType { Unknown, Storage, DIDRegistry }
 }

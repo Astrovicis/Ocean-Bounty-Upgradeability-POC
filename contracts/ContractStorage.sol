@@ -14,7 +14,8 @@ contract ContractStorage {
         address owner;
     }
 
-    Info info;                              // slot 0
+    Info info;                                   // slot 0
+//  mapping(bytes32 => DIDRegister) didRegister; // slot 3
 
     constructor(address system) public {
         info.system = system;
@@ -34,20 +35,20 @@ contract ContractStorage {
             // from MessageForwarder: selector, msg.sender, version, ...calldata
 
             // constants
-            let offset := 0x100000000000000000000000000000000000000000000000000000000
+            let offset := shl(224, 1)
 
             let ptr := mload(0x40)                                              // scratch space for calldata
             let system := sload(info_slot)                                      // load info.system address
             let version := sload(add(info_slot, 1))                             // load contract storage version
 
-            mstore(0, mul(0xe11aa6a2, offset))                                  // getContractType(address)
+            mstore(0, shl(224, 0xe11aa6a2))                                     // getContractType(address)
             mstore(0x04, caller)                                                // arg 0 - calling contract or user
             let res := call(gas, system, 0, 0, 0x24, 0, 0x20)                   // call system.getContractType
             if iszero(res) { revert(0, 0) }                                     // safety check
             let contractType := mload(0)                                        // store type from response
 
             // get call translation data from system
-            mstore(ptr, mul(0xaeaebc5c, offset))                                // getCallTranslation(uint256,address,bytes32)
+            mstore(ptr, shl(224, 0xaeaebc5c))                                   // getCallTranslation(uint256,address,bytes32)
             mstore(add(ptr, 0x04), version)                                     // arg 1 - version
             if eq(contractType, 0) { mstore(add(ptr, 0x24), address) }          // arg 2 - identifier (storage address) or
             if gt(contractType, 0) { mstore(add(ptr, 0x24), caller) }           // arg 2 - identifier (forwarder address)
@@ -59,6 +60,16 @@ contract ContractStorage {
 
             let ptr2 := add(ptr, mload(ptr))                                    // ptr2 is pointer to start of translation data
             let libAddress := mload(ptr2)                                       // copy library address from returndata
+
+            calldatacopy(0, 0, 0x04)                                            // load selector into memory
+
+            if eq(div(mload(0), offset), 0xd55ec697) {                          // if the selector is for 'upgrade()'
+                res := delegatecall(gas, libAddress, 0, 0x04, 0, 0)             // delegatecall to library
+                if iszero(res) { revert(0, 0) }                                 // safety check
+
+                sstore(add(info_slot, 1), add(version, 1))                      // increment the version
+                return(0, 0)                                                    // return early
+            }
 
             let m_injParams := add(ptr2, mload(add(ptr2, 0x40)))                // mem loc injected params
             let injParams_len := mload(m_injParams)                             // num injected params
@@ -101,15 +112,9 @@ contract ContractStorage {
 
             let size := add(0x04, sub(calldatasize, cdOffset))                  // calldatasize minus injected
             size := add(size, mul(add(injParams_len, 2), 0x20))                 // add size of injected
-            
+ 
             res := delegatecall(gas, libAddress, ptr, size, 0, 0)               // delegatecall to library
             if iszero(res) { revert(0, 0) }                                     // safety check
-
-            calldatacopy(0, 0, 0x04)                                            // load selector into memory
-            let sel := mload(0)                                                 // give selector a variable
-            if eq(sel, 0xd55ec697) {                                            // if the selector was for 'upgrade()'
-                sstore(add(info_slot, 1), add(version, 1))                      // increment the version
-            }
 
             returndatacopy(ptr, 0, returndatasize)                              // copy return data into ptr for returning
             return(ptr, returndatasize)                                         // return forwarded call returndata
@@ -120,6 +125,16 @@ contract ContractStorage {
     /// @return  Info Struct that contains system, version, token, and owner
     function getInfo() public view returns (ContractStorage.Info memory) {
         return info;
+    }
+
+    function getSlotFromKey(bytes32 key, uint256 slotNumber) public view returns (bytes32 returnData)
+    {
+        assembly
+        {
+            mstore(0, key)
+            mstore(0x20, slotNumber)
+            returnData := sload(keccak256(0, 0x40))
+        }
     }
 
     /// @dev Sets the owner of the platform
