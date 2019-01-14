@@ -124,22 +124,12 @@ contract ContractSystem is Ownable() {
         CallTranslationData memory translationData;
         bytes32 sel;
         assembly { sel := shl(224, 0xd55ec697) }
-        if(selector == sel) // 'upgrade()'
+        if (selector == sel) // 'upgrade()'
         {
             require(version != contractData.currentVersion);
             translationData.libraryLocation = contractData.upgradeAgents[version];
             translationData.librarySelector = selector;
             return translationData;
-        }
-        else
-        {
-            assembly
-            {
-                mstore(0, version)
-                mstore(0x20, sload(add(contractData_slot, 1)))
-                log0(0, 0x40)
-            }
-            // require(version == contractData.currentVersion);
         }
 
         translationData = contractData.callTranslationData[version][selector];
